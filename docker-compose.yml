@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: wolly_app
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./
+    ports:
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+    depends_on:
+      - posgressDB
+    environment:
+      DB_HOST: posgressDB
+      DB_PORT: 5432
+      DB_NAME: wolly
+      DB_USER: postgres
+      DB_PASSWORD: password
+      PORT: 3000
+      JWT_SECRET: your-secret-key-here
+
+  posgressDB:
+    image: postgres:13
+    container_name: wolly_db
+    environment:
+      POSTGRES_DB: wolly
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
