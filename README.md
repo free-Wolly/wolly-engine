@@ -70,14 +70,24 @@ This API uses JWT (JSON Web Tokens) for authentication. To access protected rout
 
 ## Environment Variables
 
+For local setup have a postgres db running on port 5432 and create a database called `wolly`
+
 Create a `.env` file in the root directory with the following variables:
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=wolly
+DB_USER=postgres
+DB_PASSWORD=password
+PORT=3000
+JWT_SECRET=your-secret-key-here
 
 ## Docker Setup
 
 This project includes a Docker setup for easy development and deployment.
 
 1. Make sure you have Docker and Docker Compose installed on your machine.
-2. Run `docker-compose up --build` to start the application and database containers.
+2. Run `docker-compose up` to start the application and database containers.
 3. The API will be available at `http://localhost:3000`.
 
 Note: The Docker setup uses the development Dockerfile (`Dockerfile.dev`) and mounts the local directory for hot reloading during development.
