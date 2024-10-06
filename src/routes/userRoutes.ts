@@ -4,11 +4,12 @@ import {
   authenticate,
   authorizeAdmin,
   authorizeUserOrAdmin,
+  extractUser,
 } from "../middleware/auth";
 
 const router = express.Router();
 
-router.post("/register", userController.createUser);
+router.post("/register", extractUser, userController.createUser);
 router.post("/login", userController.login);
 
 // Protected routes

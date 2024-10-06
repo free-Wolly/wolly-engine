@@ -1,10 +1,11 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../config/database";
 import Employee from "./employee";
+import { v4 as uuidv4 } from "uuid";
 
-interface WorkScheduleAttributes {
-  id?: number;
-  employeeId: number;
+export interface WorkScheduleAttributes {
+  id: string;
+  employeeId: string;
   workday:
     | "MONDAY"
     | "TUESDAY"
@@ -15,17 +16,19 @@ interface WorkScheduleAttributes {
     | "SUNDAY";
   workStartTime: Date;
   workEndTime: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface WorkScheduleCreationAttributes
-  extends Omit<WorkScheduleAttributes, "id"> {}
+  extends Omit<WorkScheduleAttributes, "id" | "createdAt" | "updatedAt"> {}
 
 class WorkSchedule
   extends Model<WorkScheduleAttributes, WorkScheduleCreationAttributes>
   implements WorkScheduleAttributes
 {
-  public id!: number;
-  public employeeId!: number;
+  public id!: string;
+  public employeeId!: string;
   public workday!:
     | "MONDAY"
     | "TUESDAY"
@@ -36,12 +39,19 @@ class WorkSchedule
     | "SUNDAY";
   public workStartTime!: Date;
   public workEndTime!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 WorkSchedule.init(
   {
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+      defaultValue: () => `SCHEDULE-${uuidv4()}`,
+    },
     employeeId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: Employee,
@@ -61,12 +71,22 @@ WorkSchedule.init(
       allowNull: false,
     },
     workStartTime: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     workEndTime: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
@@ -75,7 +95,25 @@ WorkSchedule.init(
   }
 );
 
-Employee.hasMany(WorkSchedule);
-WorkSchedule.belongsTo(Employee);
+Employee.hasMany(WorkSchedule, {
+  foreignKey: "employeeId",
+  sourceKey: "id",
+  as: "schedules",
+});
+WorkSchedule.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  targetKey: "id",
+  as: "employee",
+});
+
+WorkSchedule.beforeCreate((workSchedule: WorkSchedule) => {
+  const date = new Date();
+  workSchedule.createdAt = date;
+  workSchedule.updatedAt = date;
+});
+
+WorkSchedule.beforeUpdate((workSchedule: WorkSchedule) => {
+  workSchedule.updatedAt = new Date();
+});
 
 export default WorkSchedule;

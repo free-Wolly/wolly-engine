@@ -1,78 +1,165 @@
 import { Request, Response } from "express";
 import Employee from "../models/employee";
-import WorkSchedule from "../models/workSchedule";
+import WorkSchedule, { WorkScheduleAttributes } from "../models/workSchedule";
+import {
+  CreateEmployeeRequest,
+  UpdateEmployeeRequest,
+  EmployeeResponse,
+} from "../types/employee";
+import { ErrorResponse } from "../types/error";
+import {
+  generatePaginationResponse,
+  getPaginationParams,
+} from "../utils/paginateUtils";
+import { PaginationResponse } from "../types/pagination";
+import { toEmployeeResponse } from "../utils/employeeUtils";
 
-export const createEmployee = async (req: Request, res: Response) => {
+type EmployeeWithSchedules = Employee & { schedules: WorkSchedule[] };
+
+export const createEmployee = async (
+  req: Request<{}, {}, CreateEmployeeRequest>,
+  res: Response<EmployeeResponse | ErrorResponse>
+) => {
   try {
-    const { name, phone, salary, schedules } = req.body;
-    const employee = await Employee.create({ name, phone, salary });
+    const { name, phone, email, salary, schedules } = req.body;
 
-    if (schedules && schedules.length > 0) {
-      const workSchedules = schedules.map((schedule: any) => ({
-        ...schedule,
-        employeeId: employee.id,
-      }));
-      await WorkSchedule.bulkCreate(workSchedules);
+    console.log(req.body);
+
+    const employee = await Employee.create({ name, phone, email, salary });
+
+    if (!schedules) {
+      return res
+        .status(400)
+        .json({ error: "At least one schedule is required" });
     }
 
-    res.status(201).json(employee);
+    const workSchedules = schedules.map((s) => ({
+      ...s,
+      workStartTime: new Date(s.workStartTime),
+      workEndTime: new Date(s.workEndTime),
+      employeeId: employee.id,
+    }));
+
+    const newWorkSchedules = (await WorkSchedule.bulkCreate(workSchedules)).map(
+      (s) => s.toJSON()
+    );
+
+    const response = {
+      ...employee.toJSON(),
+      createdAt: employee.createdAt.toISOString(),
+      updatedAt: employee.updatedAt.toISOString(),
+      schedules: newWorkSchedules.map((s) => ({
+        ...s,
+        workStartTime: s.workStartTime.toISOString(),
+        workEndTime: s.workEndTime.toISOString(),
+        createdAt: s.createdAt.toISOString(),
+        updatedAt: s.updatedAt.toISOString(),
+      })),
+    };
+
+    res.status(201).json(response);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
 };
 
-export const getAllEmployees = async (_req: Request, res: Response) => {
+export const getAllEmployees = async (
+  req: Request,
+  res: Response<PaginationResponse<EmployeeResponse> | ErrorResponse>
+) => {
+  const { page, limit } = getPaginationParams(req.query);
+
   try {
-    const employees = await Employee.findAll({
-      include: [{ model: WorkSchedule }],
-    });
-    res.status(200).json(employees);
+    const result = (await Employee.findAndCountAll({
+      include: [{ model: WorkSchedule, as: "schedules" }],
+      distinct: true,
+      offset: limit * page,
+      limit: limit,
+      order: [["createdAt", "DESC"]],
+    })) as {
+      rows: EmployeeWithSchedules[];
+      count: number;
+    };
+
+    console.log(result);
+
+    const transformedResult = {
+      rows: result.rows.map(toEmployeeResponse),
+      count: result.count,
+    };
+
+    const response = generatePaginationResponse(transformedResult, page, limit);
+
+    res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ error: (error as Error).message });
+    res.status(400).json({ error: (error as Error).message });
   }
 };
 
-export const getEmployeeById = async (req: Request, res: Response) => {
+export const getEmployeeById = async (
+  req: Request<{ id: string }>,
+  res: Response<EmployeeResponse | ErrorResponse>
+) => {
   try {
     const employee = await Employee.findByPk(req.params.id, {
-      include: [{ model: WorkSchedule }],
+      include: [{ model: WorkSchedule, as: "schedules" }],
     });
+
     if (employee) {
-      res.status(200).json(employee);
+      const response = toEmployeeResponse(employee as EmployeeWithSchedules);
+      res.status(200).json(response);
     } else {
-      res.status(404).json({ message: "Employee not found" });
+      res.status(404).json({ error: "Employee not found" });
     }
   } catch (error) {
     res.status(500).json({ error: (error as Error).message });
   }
 };
 
-export const updateEmployee = async (req: Request, res: Response) => {
+export const updateEmployee = async (
+  req: Request<{ id: string }, {}, UpdateEmployeeRequest>,
+  res: Response<EmployeeResponse | ErrorResponse>
+) => {
   try {
-    const { name, phone, salary, schedules } = req.body;
-    const employee = await Employee.findByPk(req.params.id);
-    if (employee) {
-      await employee.update({ name, phone, salary });
+    const { name, phone, email, salary } = req.body;
+    const employee = await Employee.findByPk(req.params.id, {
+      include: [{ model: WorkSchedule, as: "schedules" }],
+    });
 
-      if (schedules && schedules.length > 0) {
-        await WorkSchedule.destroy({ where: { employeeId: employee.id } });
-        const workSchedules = schedules.map((schedule: any) => ({
-          ...schedule,
-          employeeId: employee.id,
-        }));
-        await WorkSchedule.bulkCreate(workSchedules);
+    if (employee) {
+      if (email) {
+        employee.email = email;
       }
 
-      res.status(200).json(employee);
+      if (salary) {
+        employee.salary = salary;
+      }
+
+      if (name) {
+        employee.name = name;
+      }
+
+      if (phone) {
+        employee.phone = phone;
+      }
+
+      await employee.save();
+
+      res
+        .status(200)
+        .json(toEmployeeResponse(employee as EmployeeWithSchedules));
     } else {
-      res.status(404).json({ message: "Employee not found" });
+      res.status(404).json({ error: "Employee not found" });
     }
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
 };
 
-export const deleteEmployee = async (req: Request, res: Response) => {
+export const deleteEmployee = async (
+  req: Request<{ id: string }>,
+  res: Response
+) => {
   try {
     const employee = await Employee.findByPk(req.params.id);
     if (employee) {
@@ -80,7 +167,7 @@ export const deleteEmployee = async (req: Request, res: Response) => {
       await employee.destroy();
       res.status(204).send();
     } else {
-      res.status(404).json({ message: "Employee not found" });
+      res.status(404).json({ error: "Employee not found" });
     }
   } catch (error) {
     res.status(500).json({ error: (error as Error).message });

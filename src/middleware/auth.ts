@@ -45,6 +45,32 @@ export const authenticate = async (
   }
 };
 
+export const extractUser = async (
+  req: Request,
+  _: Response,
+  next: NextFunction
+) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+
+  if (!token) {
+    return next();
+  }
+
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_SECRET || "your-secret-key"
+  ) as JwtPayload;
+
+  const user = await User.findByPk(decoded.id);
+
+  if (!user) {
+    return next();
+  }
+
+  req.user = user;
+  next();
+};
+
 export const authorizeAdmin = (
   req: Request,
   res: Response,
