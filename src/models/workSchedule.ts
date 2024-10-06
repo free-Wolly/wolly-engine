@@ -3,6 +3,16 @@ import sequelize from "../config/database";
 import Employee from "./employee";
 import { v4 as uuidv4 } from "uuid";
 
+export const WORK_DAYS = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+];
+
 export interface WorkScheduleAttributes {
   id: string;
   employeeId: string;

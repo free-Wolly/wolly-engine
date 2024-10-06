@@ -13,55 +13,99 @@ import {
 } from "../utils/paginateUtils";
 import { PaginationResponse } from "../types/pagination";
 import { toEmployeeResponse } from "../utils/employeeUtils";
+import { body, validationResult } from "express-validator";
+import { WORK_DAYS } from "../models/workSchedule";
 
 type EmployeeWithSchedules = Employee & { schedules: WorkSchedule[] };
 
-export const createEmployee = async (
-  req: Request<{}, {}, CreateEmployeeRequest>,
-  res: Response<EmployeeResponse | ErrorResponse>
-) => {
-  try {
-    const { name, phone, email, salary, schedules } = req.body;
+export const createEmployee = [
+  body("name").trim().notEmpty().withMessage("name field is required"),
+  body("phone")
+    .trim()
+    .notEmpty()
+    .isMobilePhone("any")
+    .withMessage("phone field is invalid"),
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("email is invalid")
+    .normalizeEmail(),
+  body("salary").isNumeric().toFloat(),
+  body("schedules")
+    .isArray({ min: 1 })
+    .withMessage("at least one schedule is required")
+    .custom((schedules: WorkScheduleAttributes[]) => {
+      return schedules.every((schedule) => {
+        return (
+          schedule.workday &&
+          WORK_DAYS.includes(schedule.workday) &&
+          schedule.workStartTime &&
+          schedule.workEndTime &&
+          new Date(schedule.workStartTime) < new Date(schedule.workEndTime)
+        );
+      });
+    })
+    .withMessage("invalid schedules"),
+  async (
+    req: Request<{}, {}, CreateEmployeeRequest>,
+    res: Response<EmployeeResponse | ErrorResponse>
+  ) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ error: errors.array()[0].msg });
+      }
 
-    console.log(req.body);
+      const { name, phone, email, salary, schedules } = req.body;
 
-    const employee = await Employee.create({ name, phone, email, salary });
+      const existingEmployee = await Employee.findOne({
+        where: { phone },
+      });
 
-    if (!schedules) {
-      return res
-        .status(400)
-        .json({ error: "At least one schedule is required" });
-    }
+      if (existingEmployee) {
+        return res
+          .status(400)
+          .json({ error: "Employee with given phone already exists" });
+      }
 
-    const workSchedules = schedules.map((s) => ({
-      ...s,
-      workStartTime: new Date(s.workStartTime),
-      workEndTime: new Date(s.workEndTime),
-      employeeId: employee.id,
-    }));
+      const employee = await Employee.create({ name, phone, email, salary });
 
-    const newWorkSchedules = (await WorkSchedule.bulkCreate(workSchedules)).map(
-      (s) => s.toJSON()
-    );
+      if (!schedules) {
+        return res
+          .status(400)
+          .json({ error: "At least one schedule is required" });
+      }
 
-    const response = {
-      ...employee.toJSON(),
-      createdAt: employee.createdAt.toISOString(),
-      updatedAt: employee.updatedAt.toISOString(),
-      schedules: newWorkSchedules.map((s) => ({
+      const workSchedules = schedules.map((s) => ({
         ...s,
-        workStartTime: s.workStartTime.toISOString(),
-        workEndTime: s.workEndTime.toISOString(),
-        createdAt: s.createdAt.toISOString(),
-        updatedAt: s.updatedAt.toISOString(),
-      })),
-    };
+        workStartTime: new Date(s.workStartTime),
+        workEndTime: new Date(s.workEndTime),
+        employeeId: employee.id,
+      }));
 
-    res.status(201).json(response);
-  } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
-  }
-};
+      const newWorkSchedules = (
+        await WorkSchedule.bulkCreate(workSchedules)
+      ).map((s) => s.toJSON());
+
+      const response = {
+        ...employee.toJSON(),
+        createdAt: employee.createdAt.toISOString(),
+        updatedAt: employee.updatedAt.toISOString(),
+        schedules: newWorkSchedules.map((s) => ({
+          ...s,
+          workStartTime: s.workStartTime.toISOString(),
+          workEndTime: s.workEndTime.toISOString(),
+          createdAt: s.createdAt.toISOString(),
+          updatedAt: s.updatedAt.toISOString(),
+        })),
+      };
+
+      res.status(201).json(response);
+    } catch (error) {
+      res.status(400).json({ error: (error as Error).message });
+    }
+  },
+];
 
 export const getAllEmployees = async (
   req: Request,
@@ -116,45 +160,68 @@ export const getEmployeeById = async (
   }
 };
 
-export const updateEmployee = async (
-  req: Request<{ id: string }, {}, UpdateEmployeeRequest>,
-  res: Response<EmployeeResponse | ErrorResponse>
-) => {
-  try {
-    const { name, phone, email, salary } = req.body;
-    const employee = await Employee.findByPk(req.params.id, {
-      include: [{ model: WorkSchedule, as: "schedules" }],
-    });
-
-    if (employee) {
-      if (email) {
-        employee.email = email;
+export const updateEmployee = [
+  body("name")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("name should not be invalid"),
+  body("phone")
+    .optional()
+    .trim()
+    .notEmpty()
+    .isMobilePhone("any")
+    .withMessage("phone field is invalid"),
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("email is invalid")
+    .normalizeEmail(),
+  body("salary").optional().isNumeric().withMessage("invalid salary").toFloat(),
+  async (
+    req: Request<{ id: string }, {}, UpdateEmployeeRequest>,
+    res: Response<EmployeeResponse | ErrorResponse>
+  ) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ error: errors.array()[0].msg });
       }
+      const { name, phone, email, salary } = req.body;
+      const employee = await Employee.findByPk(req.params.id, {
+        include: [{ model: WorkSchedule, as: "schedules" }],
+      });
 
-      if (salary) {
-        employee.salary = salary;
+      if (employee) {
+        if (email) {
+          employee.email = email;
+        }
+
+        if (salary) {
+          employee.salary = salary;
+        }
+
+        if (name) {
+          employee.name = name;
+        }
+
+        if (phone) {
+          employee.phone = phone;
+        }
+
+        await employee.save();
+
+        res
+          .status(200)
+          .json(toEmployeeResponse(employee as EmployeeWithSchedules));
+      } else {
+        res.status(404).json({ error: "Employee not found" });
       }
-
-      if (name) {
-        employee.name = name;
-      }
-
-      if (phone) {
-        employee.phone = phone;
-      }
-
-      await employee.save();
-
-      res
-        .status(200)
-        .json(toEmployeeResponse(employee as EmployeeWithSchedules));
-    } else {
-      res.status(404).json({ error: "Employee not found" });
+    } catch (error) {
+      res.status(400).json({ error: (error as Error).message });
     }
-  } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
-  }
-};
+  },
+];
 
 export const deleteEmployee = async (
   req: Request<{ id: string }>,
