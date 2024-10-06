@@ -116,6 +116,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -281,7 +286,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Jane Employee 12\",\n  \"phone\": \"+9955550080223\",\n  \"salary\": 123,\n  \"schedules\": [\n    {\n        \"workday\": \"WEDNESDAY\",\n        \"workStartTime\": \"2011-10-05T14:48:00.000Z\",\n        \"workEndTime\": \"2011-10-05T14:48:00.000Z\"\n    }\n  ]\n}"
+							"raw": "{\n  \"name\": \"Jane Employee 12\",\n  \"phone\": \"555008022\",\n  \"salary\": 123,\n  \"schedules\": [\n    {\n        \"workday\": \"WEDNESDAY\",\n        \"workStartTime\": \"2011-10-05T14:47:00.000Z\",\n        \"workEndTime\": \"2011-10-05T14:48:00.000Z\"\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/employees",
