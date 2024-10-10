@@ -226,6 +226,7 @@ export const customerCreateCleaningOrder = [
         const newAddress = await Address.create(
           {
             ...address,
+            customerId: customerInfo?.customerId,
           },
           { transaction }
         );
