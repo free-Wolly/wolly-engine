@@ -15,6 +15,7 @@ import { PaginationResponse } from "../types/pagination";
 import { toEmployeeResponse } from "../utils/employeeUtils";
 import { body, validationResult } from "express-validator";
 import { WORK_DAYS } from "../models/workSchedule";
+import sequelize from "../config/database";
 
 type EmployeeWithSchedules = Employee & { schedules: WorkSchedule[] };
 
@@ -50,6 +51,7 @@ export const createEmployee = [
     req: Request<{}, {}, CreateEmployeeRequest>,
     res: Response<EmployeeResponse | ErrorResponse>
   ) => {
+    const transaction = await sequelize.transaction();
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -60,17 +62,23 @@ export const createEmployee = [
 
       const existingEmployee = await Employee.findOne({
         where: { phone },
+        transaction,
       });
 
       if (existingEmployee) {
+        await transaction.rollback();
         return res
           .status(400)
           .json({ error: "Employee with given phone already exists" });
       }
 
-      const employee = await Employee.create({ name, phone, email, salary });
+      const employee = await Employee.create(
+        { name, phone, email, salary },
+        { transaction }
+      );
 
       if (!schedules) {
+        await transaction.rollback();
         return res
           .status(400)
           .json({ error: "At least one schedule is required" });
@@ -84,7 +92,7 @@ export const createEmployee = [
       }));
 
       const newWorkSchedules = (
-        await WorkSchedule.bulkCreate(workSchedules)
+        await WorkSchedule.bulkCreate(workSchedules, { transaction })
       ).map((s) => s.toJSON());
 
       const response = {
@@ -100,8 +108,10 @@ export const createEmployee = [
         })),
       };
 
+      await transaction.commit();
       res.status(201).json(response);
     } catch (error) {
+      await transaction.rollback();
       res.status(400).json({ error: (error as Error).message });
     }
   },
@@ -124,8 +134,6 @@ export const getAllEmployees = async (
       rows: EmployeeWithSchedules[];
       count: number;
     };
-
-    console.log(result);
 
     const transformedResult = {
       rows: result.rows.map(toEmployeeResponse),

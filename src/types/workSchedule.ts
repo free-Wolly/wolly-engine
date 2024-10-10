@@ -42,5 +42,3 @@ export interface UpdateWorkScheduleRequest {
   workStartTime?: string;
   workEndTime?: string;
 }
-
-export type GetAllWorkSchedulesResponse = WorkScheduleResponse[];

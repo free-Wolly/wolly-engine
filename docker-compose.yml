@@ -21,6 +21,7 @@ services:
       DB_PASSWORD: password
       PORT: 3000
       JWT_SECRET: your-secret-key-here
+      CUSTOMER_JWT_SECRET: your-customer-secret-key-here
 
   posgressDB:
     image: postgres:13

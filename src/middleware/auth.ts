@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
+import { body, validationResult } from "express-validator";
 
 interface JwtPayload {
-  id: number;
+  id: string;
   email: string;
   role: string;
 }
@@ -83,7 +84,7 @@ export const authorizeAdmin = (
   }
 };
 
-export const authorizeUserOrAdmin = (
+export const authorizeSelfUserOrAdmin = (
   req: Request,
   res: Response,
   next: NextFunction

@@ -4,28 +4,32 @@ import jwt from "jsonwebtoken";
 import sequelize from "../config/database";
 import { v4 as uuidv4 } from "uuid";
 
-interface UserAttributes {
+export interface CustomerAttributes {
   id: string;
+  username: string;
   name: string;
-  email: string;
+  lastname: string;
+  email?: string;
+  phone: string;
   passwordHash: string;
-  role: "ADMIN" | "USER";
   createdAt: Date;
   updatedAt: Date;
 }
 
-interface UserCreationAttributes
-  extends Omit<UserAttributes, "id" | "createdAt" | "updatedAt"> {}
+interface CustomerCreationAttributes
+  extends Omit<CustomerAttributes, "id" | "createdAt" | "updatedAt"> {}
 
-class User
-  extends Model<UserAttributes, UserCreationAttributes>
-  implements UserAttributes
+class Customer
+  extends Model<CustomerAttributes, CustomerCreationAttributes>
+  implements CustomerAttributes
 {
   public id!: string;
+  public username!: string;
   public name!: string;
+  public lastname!: string;
   public email!: string;
+  public phone!: string;
   public passwordHash!: string;
-  public role!: "ADMIN" | "USER";
   public createdAt!: Date;
   public updatedAt!: Date;
 
@@ -33,14 +37,15 @@ class User
     return jwt.sign(
       {
         id: this.id,
+        username: this.username,
         name: this.name,
+        lastname: this.lastname,
         email: this.email,
-        role: this.role,
+        phone: this.phone,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt,
       },
-      process.env.JWT_SECRET || "your-secret-key",
-      { expiresIn: "1h" }
+      process.env.CUSTOMER_JWT_SECRET || "your-secret-key"
     );
   }
 
@@ -49,33 +54,43 @@ class User
   }
 }
 
-User.init(
+Customer.init(
   {
     id: {
       type: DataTypes.STRING,
       primaryKey: true,
-      defaultValue: () => `USER-${uuidv4()}`,
+      defaultValue: () => `CUSTOMER-${uuidv4()}`,
+      allowNull: false,
+    },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    email: {
+    lastname: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
       unique: true,
       validate: {
         isEmail: true,
       },
     },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
     passwordHash: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    role: {
-      type: DataTypes.ENUM("ADMIN", "USER"),
-      allowNull: false,
-      defaultValue: "USER",
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -90,21 +105,21 @@ User.init(
   },
   {
     sequelize,
-    modelName: "User",
-    tableName: "Users",
+    modelName: "Customer",
+    tableName: "Customers",
   }
 );
 
-User.beforeCreate(async (user: User) => {
+Customer.beforeCreate(async (customer: Customer) => {
   const salt = await bcrypt.genSalt(10);
   const date = new Date();
-  user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
-  user.createdAt = date;
-  user.updatedAt = date;
+  customer.passwordHash = await bcrypt.hash(customer.passwordHash, salt);
+  customer.createdAt = date;
+  customer.updatedAt = date;
 });
 
-User.beforeUpdate(async (user: User) => {
-  user.updatedAt = new Date();
+Customer.beforeUpdate(async (customer: Customer) => {
+  customer.updatedAt = new Date();
 });
 
-export default User;
+export default Customer;

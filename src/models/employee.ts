@@ -52,7 +52,7 @@ Employee.init(
       allowNull: true,
     },
     salary: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(10, 4),
       allowNull: false,
     },
     createdAt: {
@@ -69,6 +69,7 @@ Employee.init(
   {
     sequelize,
     modelName: "Employee",
+    tableName: "Employees",
   }
 );
 

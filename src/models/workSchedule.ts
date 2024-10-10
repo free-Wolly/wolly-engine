@@ -102,6 +102,7 @@ WorkSchedule.init(
   {
     sequelize,
     modelName: "WorkSchedule",
+    tableName: "WorkSchedules",
   }
 );
 

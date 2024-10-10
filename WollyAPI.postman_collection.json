@@ -1,0 +1,913 @@
+{
+	"info": {
+		"_postman_id": "bb018f85-53e9-464a-9fde-e78fd9111967",
+		"name": "WollyAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "19803694"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/users"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/users/{{userId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"token\", jsonData.token);",
+									"pm.collectionVariables.set(\"userId\", jsonData.user.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": "{{baseUrl}}/users/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\"\n}"
+						},
+						"url": "{{baseUrl}}/users/{{userId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{baseUrl}}/users/{{userId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"token\", jsonData.token);",
+									"pm.collectionVariables.set(\"userId\", jsonData.user.id);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/users/login"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"item": [
+				{
+					"name": "Get All Employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/employees"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/employees/{{employeeId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"employeeId\", jsonData.id);",
+									"pm.collectionVariables.set(\"scheduleId\", jsonData.schedules[0].id);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Employee 1\",\n  \"phone\": \"+995555008022\",\n  \"salary\": 123,\n  \"schedules\": [\n    {\n        \"workday\": \"WEDNESDAY\",\n        \"workStartTime\": \"2011-10-05T14:47:00.000Z\",\n        \"workEndTime\": \"2011-10-05T14:48:00.000Z\"\n    }\n  ]\n}"
+						},
+						"url": "{{baseUrl}}/employees"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Updated\"\n}"
+						},
+						"url": "{{baseUrl}}/employees/{{employeeId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/employees/{{employeeId}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Work Schedules",
+			"item": [
+				{
+					"name": "Get Work Schedule by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/work-schedules/{{scheduleId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Work Schedule",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"workStartTime\": \"2023-05-01T09:00:00Z\",\n  \"workEndTime\": \"2023-05-01T17:00:00Z\",\n  \"workday\": \"THURSDAY\"\n}"
+						},
+						"url": "{{baseUrl}}/work-schedules"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Work Schedule",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"workStartTime\": \"2023-05-01T10:00:00Z\",\n  \"workEndTime\": \"2023-05-01T18:00:00Z\"\n}"
+						},
+						"url": "{{baseUrl}}/work-schedules/{{scheduleId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Work Schedule",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{baseUrl}}/works-chedules/{{scheduleId}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"customerToken\", jsonData.token);",
+									"pm.collectionVariables.set(\"customerId\", jsonData.customer.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"username123\",\n    \"password\": \"Password123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrlCustomer}}/customer/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"customerToken\", jsonData.token);",
+									"pm.collectionVariables.set(\"customerId\", jsonData.customer.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"username123\",\n    \"email\": \"email@test.com\",\n    \"password\": \"Password123!\",\n    \"name\": \"testname\",\n    \"lastname\": \"testlastname\",\n    \"phone\": \"555009095\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrlCustomer}}/customer/register"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Address",
+			"item": [
+				{
+					"name": "GetCustomerAddresses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrlCustomer}}/address/{{customerId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CustomerCreateAddress",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"addressId\", jsonData.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"street\": \"123 New St\",\n  \"city\": \"New City\",\n  \"postalCode\": \"12345\",\n  \"country\": \"New Country\",\n  \"latitude\": \"12.3456\",\n  \"longitude\": \"78.9012\",\n  \"isDefault\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrlCustomer}}/address/{{customerId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CustomerUpdateAddress",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"street\": \"456 Updated St\",\n  \"city\": \"New City\",\n  \"postalCode\": \"54321\",\n  \"country\": \"Updated Country\",\n  \"latitude\": \"12.3456\",\n  \"longitude\": \"78.9012\",\n  \"isDefault\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrlCustomer}}/address/{{customerId}}/{{addressId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CRMUpdateAddress",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"street\": \"789 CRM St\",\n  \"city\": \"CRM City\",\n  \"postalCode\": \"67890\",\n  \"country\": \"CRM Country\",\n  \"latitude\": \"34.5678\",\n  \"longitude\": \"90.1234\",\n  \"isDefault\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/addresses/{{customerId}}/{{addressId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CRMGetAddresses",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/addresses/{{customerId}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CleaningOrders",
+			"item": [
+				{
+					"name": "CustomerCreateOrder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"addressId\", jsonData.addressId);",
+									"pm.collectionVariables.set(\"cleaningOrderId\", jsonData.id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"addressId\": \"{{addressId}}\",\n  \"startTime\": \"2024-10-10T12:46:06.180Z\",\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"serviceType\": \"REGULAR_CLEANING\",\n  \"serviceOptions\": {},\n  \"occurance\": \"ONE_TIME\",\n  \"orderDetails\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrlCustomer}}/cleaning-orders"
+					},
+					"response": []
+				},
+				{
+					"name": "CustomerCreateOrderNewAddress",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"cleaningOrderId\", jsonData.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\": {\n        \"street\": \"123 New St\",\n        \"city\": \"New City\",\n        \"postalCode\": \"12345\",\n        \"country\": \"New Country\",\n        \"latitude\": \"12.3456\",\n        \"longitude\": \"78.9012\",\n        \"isDefault\": true\n    },\n    \"startTime\": \"2024-10-10T12:46:06.180Z\",\n    \"paymentMethod\": \"CARD\",\n    \"serviceType\": \"REGULAR_CLEANING\",\n    \"serviceOptions\": {},\n    \"occurance\": \"ONE_TIME\",\n    \"orderDetails\": {\n        \"rooms\": {\n            \"livingRoom\": 1,\n            \"kitchen\": 1,\n            \"bathroom\": 1,\n            \"bedroom\": 1,\n            \"squareMeters\": 50\n        },\n        \"balcony\": {\n            \"squareMeters\": 50\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrlCustomer}}/cleaning-orders"
+					},
+					"response": []
+				},
+				{
+					"name": "CustomerUpdateOrder",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"startTime\": \"2024-10-10T12:10:06.180Z\",\n  \"comment\": \"Please bring extra cleaning supplies\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrlCustomer}}/cleaning-orders/{{customerId}}/{{cleaningOrderId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CustomerGetAllByCustomer",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrlCustomer}}/cleaning-orders/{{customerId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CustomerGetOrderById",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrlCustomer}}/cleaning-orders/{{customerId}}/{{cleaningOrderId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CRMCreateOrder",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerLastname\": \"Smith\",\n  \"customerPhone\": \"+1234567890\",\n  \"customerId\": \"{{customerId}}\",\n  \"addressId\": \"{{addressId}}\",\n  \"startTime\": \"2023-05-01T10:00:00Z\",\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"serviceType\": \"REGULAR_CLEANING\",\n  \"serviceOptions\": {},\n  \"occurance\": \"ONE_TIME\",\n  \"orderDetails\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/cleaning-orders"
+					},
+					"response": []
+				},
+				{
+					"name": "CRMCreateOrderNewAddress",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerLastname\": \"Smith\",\n  \"customerPhone\": \"+1234567890\",\n  \"customerId\": \"{{customerId}}\",\n  \"addressId\": \"{{addressId}}\",\n  \"startTime\": \"2023-05-01T10:00:00Z\",\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"serviceType\": \"REGULAR_CLEANING\",\n  \"serviceOptions\": {},\n  \"occurance\": \"ONE_TIME\",\n  \"orderDetails\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/cleaning-orders"
+					},
+					"response": []
+				},
+				{
+					"name": "CRMGetAllOrders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/cleaning-orders"
+					},
+					"response": []
+				},
+				{
+					"name": "CRMGetOrderById",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/cleaning-orders/{{cleaningOrderId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CRMUpdateOrderById",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"startTime\": \"2023-05-02T11:00:00Z\",\n  \"endTime\": \"2023-05-02T13:00:00Z\",\n  \"orderStatus\": \"COMPLETED\",\n  \"paymentStatus\": \"PAID\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/cleaning-orders/{{cleaningOrderId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "CRMDeleteOrderById",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{baseUrl}}/cleaning-orders/{{cleaningOrderId}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "seed",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{baseUrl}}/seed"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/crm"
+		},
+		{
+			"key": "userId",
+			"value": "1"
+		},
+		{
+			"key": "employeeId",
+			"value": "1"
+		},
+		{
+			"key": "scheduleId",
+			"value": "1"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlCustomer",
+			"value": "http://localhost:3000/api",
+			"type": "string"
+		},
+		{
+			"key": "customerTolen",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "addressId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerToken",
+			"value": ""
+		},
+		{
+			"key": "cleaningOrderId",
+			"value": ""
+		}
+	]
+}

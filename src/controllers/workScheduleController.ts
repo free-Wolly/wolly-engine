@@ -19,11 +19,11 @@ export const createWorkSchedule = [
   body("workStartTime")
     .notEmpty()
     .withMessage("workStartTime field is required")
-    .isDate(),
+    .isISO8601(),
   body("workEndTime")
     .notEmpty()
     .withMessage("workEndTime field is required")
-    .isDate(),
+    .isISO8601(),
   body()
     .custom((_, { req }) => {
       const workStartTime = new Date(req.body.workStartTime);
@@ -85,11 +85,11 @@ export const updateWorkSchedule = [
     .withMessage("workday field is invalid"),
   body("workStartTime")
     .optional()
-    .isDate()
+    .isISO8601()
     .withMessage("workStartTime field is invalid"),
   body("workEndTime")
     .optional()
-    .isDate()
+    .isISO8601()
     .withMessage("workEndTime field is invalid"),
   async (
     req: Request<{ id: string }, {}, UpdateWorkScheduleRequest>,

@@ -1,6 +1,6 @@
 import express from "express";
-import * as workScheduleController from "../controllers/workScheduleController";
-import { authenticate, authorizeAdmin } from "../middleware/auth";
+import * as workScheduleController from "../../controllers/workScheduleController";
+import { authenticate, authorizeAdmin } from "../../middleware/auth";
 
 const router = express.Router();
 

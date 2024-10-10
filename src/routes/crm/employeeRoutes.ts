@@ -1,10 +1,6 @@
 import express from "express";
-import * as employeeController from "../controllers/employeeController";
-import {
-  authenticate,
-  authorizeAdmin,
-  authorizeUserOrAdmin,
-} from "../middleware/auth";
+import * as employeeController from "../../controllers/employeeController";
+import { authenticate, authorizeAdmin } from "../../middleware/auth";
 
 const router = express.Router();
 
